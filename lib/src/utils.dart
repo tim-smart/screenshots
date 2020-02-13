@@ -258,7 +258,7 @@ String getIosSimulatorLocale(String udId) {
     ]));
     return xmlDoc.findAllElements('string').first.text;
   } catch (_) {
-    return '';
+    return 'en_US';
   }
 }
 
