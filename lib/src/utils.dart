@@ -180,7 +180,8 @@ String getIosSimulatorLocale(String udId) {
   // create file if missing (iOS 13)
   final globalPreferences = fs.file(globalPreferencesPath);
   if (!globalPreferences.existsSync()) {
-    printStatus('Warning: creating default $globalPreferencesPath with locale en_US (for iOS 13)');
+    printStatus(
+        'Warning: creating default $globalPreferencesPath with locale en_US (for iOS 13)');
     final contents = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -245,9 +246,20 @@ String getIosSimulatorLocale(String udId) {
   }
 
   // extract locale using xml (plutil json converter does not support dates #169)
-  final xmlDoc=
-      xml.parse(cmd(['plutil', '-extract', 'AppleLocale', 'xml1', '-o', '-', globalPreferences.path]));
-  return xmlDoc.findAllElements('string').first.text;
+  try {
+    final xmlDoc = xml.parse(cmd([
+      'plutil',
+      '-extract',
+      'AppleLocale',
+      'xml1',
+      '-o',
+      '-',
+      globalPreferences.path
+    ]));
+    return xmlDoc.findAllElements('string').first.text;
+  } catch (_) {
+    return '';
+  }
 }
 
 ///// Get android emulator id from a running emulator with id [deviceId].
@@ -418,8 +430,7 @@ Future<bool> isEmulatorPath() async {
 }
 
 /// Run command and return stdout as [string].
-String cmd(List<String> cmd,
-    {String workingDirectory, bool silent = true}) {
+String cmd(List<String> cmd, {String workingDirectory, bool silent = true}) {
   final result = processManager.runSync(cmd,
       workingDirectory: workingDirectory, runInShell: true);
   _traceCommand(cmd, workingDirectory: workingDirectory);
